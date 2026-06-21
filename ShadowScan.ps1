@@ -1515,8 +1515,7 @@ if (-not $SkipProcessScan -or $All) {
         "chrome", "msedgewebview2", "OpenCode", "powershell", "cmd", "notepad",
         "RadeonSettings", "RAVCpl64", "RtHDVCpl", "RtHDVBg", "SynTPEnh",
         "SynTPEnhService", "SynTPHelper", "memreduct", "rustdesk", "Everything",
-        "Taskmgr", "explorer", "Honeygain", "Grass", "Bytelixir", "Wipter",
-        "wipter-tunnel", "Browser Cash", "uprock-mining", "node", "npm",
+        "Taskmgr", "explorer", "node", "npm",
         "python", "java", "slack", "discord", "spotify", "steam", "EACef",
         "ESET", "mbam", "mbamtray"
     )
