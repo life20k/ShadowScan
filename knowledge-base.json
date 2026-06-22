@@ -16,11 +16,11 @@
                                       ],
                          "answer":  "ShadowScan is a Shadow Copy management system for Cursor workspaces. It automatically creates backups when you open files, restores them on close, and provides tools to view changes, undo modifications, and manage backup history.",
                          "category":  "faq",
-                         "times_asked":  1,
+                         "times_asked":  2,
                          "times_helpful":  0,
                          "helpfulness_score":  0,
                          "created":  "2025-06-21",
-                         "last_used":  "2026-06-21",
+                         "last_used":  "2026-06-22",
                          "source":  "admin"
                      },
                      {
@@ -56,11 +56,11 @@
                                       ],
                          "answer":  "Yes, ShadowScan is safe. It creates backups before making changes and never modifies your original files without confirmation. All restore operations require explicit user approval. The system uses MD5 hashing to verify file integrity.",
                          "category":  "faq",
-                         "times_asked":  0,
+                         "times_asked":  1,
                          "times_helpful":  0,
-                         "helpfulness_score":  0.0,
+                         "helpfulness_score":  0,
                          "created":  "2025-06-21",
-                         "last_used":  "2025-06-21",
+                         "last_used":  "2026-06-22",
                          "source":  "admin"
                      },
                      {
@@ -155,11 +155,11 @@
                                       ],
                          "answer":  "Click \u0027Selectively Undo Changes\u0027 to see a list of individual modifications. Check the boxes next to the changes you want to revert, then confirm. Only the selected changes will be undone while keeping other modifications.",
                          "category":  "howto",
-                         "times_asked":  0,
+                         "times_asked":  2,
                          "times_helpful":  0,
-                         "helpfulness_score":  0.0,
+                         "helpfulness_score":  0,
                          "created":  "2025-06-21",
-                         "last_used":  "2025-06-21",
+                         "last_used":  "2026-06-22",
                          "source":  "admin"
                      },
                      {
@@ -896,11 +896,11 @@
                                       ],
                          "answer":  "Yes, ShadowScan works alongside Git. It creates backups independently of Git commits. You can use both systems - Git for version control and ShadowScan for quick local restore points.",
                          "category":  "faq",
-                         "times_asked":  0,
+                         "times_asked":  1,
                          "times_helpful":  0,
-                         "helpfulness_score":  0.0,
+                         "helpfulness_score":  0,
                          "created":  "2025-06-21",
-                         "last_used":  "2025-06-21",
+                         "last_used":  "2026-06-22",
                          "source":  "admin"
                      },
                      {
@@ -1340,6 +1340,50 @@
                          "helpfulness_score":  0.0,
                          "created":  "2025-06-21",
                          "last_used":  "2025-06-21",
+                         "source":  "admin"
+                     },
+                     {
+                         "id":  "a1b2c3d4-e5f6-7890-abcd-999999999999",
+                         "question":  "Is it safe?",
+                         "normalized":  "is it safe",
+                         "keywords":  [
+                                          "is",
+                                          "it",
+                                          "safe",
+                                          "secure",
+                                          "risk",
+                                          "harm",
+                                          "damage"
+                                      ],
+                         "answer":  "Yes, ShadowScan is safe. It creates backups before making any changes and never modifies your files without confirmation. All operations require explicit user approval. You can revert any changes using the Revert feature.",
+                         "category":  "faq",
+                         "times_asked":  0,
+                         "times_helpful":  0,
+                         "helpfulness_score":  0.0,
+                         "created":  "2026-06-22",
+                         "last_used":  "2026-06-22",
+                         "source":  "admin"
+                     },
+                     {
+                         "id":  "a1b2c3d4-e5f6-7890-abcd-888888888888",
+                         "question":  "What does this tool do?",
+                         "normalized":  "what does this tool do",
+                         "keywords":  [
+                                          "what",
+                                          "does",
+                                          "this",
+                                          "tool",
+                                          "do",
+                                          "purpose",
+                                          "function"
+                                      ],
+                         "answer":  "ShadowScan cleans your PC and checks for security threats. It removes temp files, finds orphaned folders, scans for malware, optimizes startup, and repairs system files. All changes are backed up so you can revert if needed.",
+                         "category":  "faq",
+                         "times_asked":  1,
+                         "times_helpful":  0,
+                         "helpfulness_score":  0,
+                         "created":  "2026-06-22",
+                         "last_used":  "2026-06-22",
                          "source":  "admin"
                      }
                  ]

@@ -258,6 +258,10 @@ function Get-FuzzyMatch {
         if ($queryKeywords.Count -gt 0 -and $patKeywords.Count -gt 0) {
             $overlap = @($queryKeywords | Where-Object { $_ -in $patKeywords }).Count
             $keywordScore = [Math]::Min(2.5, ($overlap / [Math]::Max(1, $patKeywords.Count)) * 2.5)
+            # Bonus for short queries with high overlap ratio
+            if ($queryKeywords.Count -le 4 -and $overlap -ge 2) {
+                $keywordScore = [Math]::Min(2.5, $keywordScore * 1.5)
+            }
             $score += $keywordScore
         }
 
@@ -289,6 +293,8 @@ function Get-FuzzyMatch {
                         if ($qw[$i] -eq $pw[$i]) { $matches++ }
                     }
                     $sim = $matches / $len
+                    # Exact match bonus
+                    if ($qw -eq $pw) { $sim = 1.0 }
                     if ($sim -gt $maxWordSim) { $maxWordSim = $sim }
                 }
                 $totalSim += $maxWordSim
@@ -429,14 +435,27 @@ function Log-UnansweredQuestion {
         [double]$Confidence = 0
     )
 
-    $unanswered = @()
+    $unanswered = [System.Collections.ArrayList]@()
     if (Test-Path $Script:UnansweredPath) {
         try {
             $raw = Get-Content -Path $Script:UnansweredPath -Raw -Encoding UTF8
-            if ($raw) { $unanswered = @($raw | ConvertFrom-Json) }
+            if ($raw) {
+                $parsed = $raw | ConvertFrom-Json
+                foreach ($item in $parsed) {
+                    $null = $unanswered.Add([PSCustomObject]@{
+                        question    = $item.question
+                        normalized  = $item.normalized
+                        keywords    = @($item.keywords)
+                        timestamp   = $item.timestamp
+                        confidence  = $item.confidence
+                        occurrences = $item.occurrences
+                        category    = $item.category
+                    })
+                }
+            }
         }
         catch {
-            $unanswered = @()
+            $unanswered = [System.Collections.ArrayList]@()
         }
     }
 
@@ -469,7 +488,7 @@ function Log-UnansweredQuestion {
         $unanswered[$existingIndex].timestamp = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss")
     }
     else {
-        $unanswered += $entry
+        $null = $unanswered.Add($entry)
     }
 
     $unanswered | ConvertTo-Json -Depth 5 | Set-Content -Path $Script:UnansweredPath -Encoding UTF8
@@ -629,8 +648,16 @@ function Show-SupportStats {
         try {
             $raw = Get-Content -Path $Script:UnansweredPath -Raw -Encoding UTF8
             if ($raw) {
-                $unanswered = @($raw | ConvertFrom-Json)
+                $parsed = $raw | ConvertFrom-Json
+                $unanswered = [System.Collections.ArrayList]@()
+                foreach ($item in $parsed) {
+                    $null = $unanswered.Add([PSCustomObject]@{
+                        question    = $item.question
+                        occurrences = if ($item.occurrences) { $item.occurrences } else { 1 }
+                    })
+                }
                 $totalOcc = ($unanswered | Measure-Object -Property occurrences -Sum).Sum
+                if (-not $totalOcc) { $totalOcc = 0 }
                 Write-Host "  [Unanswered Questions]" -ForegroundColor Yellow
                 Write-Host "  Unique: $($unanswered.Count)  |  Total Occurrences: $totalOcc"
                 $top = @($unanswered | Sort-Object { $_.occurrences } -Descending | Select-Object -First 3)
@@ -864,8 +891,9 @@ if ($Ask) {
         Write-Host "  Category: $($result.Category)" -ForegroundColor DarkGray
 
         $feedback = Read-Host $Script:FeedbackPrompt
-        [bool]$helpful = $feedback -match '^[yY]'
-        Add-Feedback -Pattern $result.Pattern -Helpful $helpful -KnowledgeBase $kb
+        $isHelpful = $false
+        if ($feedback -match '^[yY]') { $isHelpful = $true }
+        Add-Feedback -Pattern $result.Pattern -Helpful $isHelpful -KnowledgeBase $kb
     }
     else {
         Write-Host "  [!] No confident answer found (score: $([Math]::Round($result.Confidence * 100, 1))%)" -ForegroundColor Yellow
