@@ -89,5 +89,17 @@
         "confidence":  0.1345,
         "occurrences":  1,
         "category":  "unclassified"
+    },
+    {
+        "question":  "will this kill my computer",
+        "normalized":  "will this kill my computer",
+        "keywords":  [
+                         "kill",
+                         "computer"
+                     ],
+        "timestamp":  "2026-06-22T19:36:09",
+        "confidence":  0.087,
+        "occurrences":  1,
+        "category":  "unclassified"
     }
 ]
