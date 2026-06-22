@@ -31,5 +31,63 @@
         "confidence":  0.1,
         "occurrences":  1,
         "category":  "unclassified"
+    },
+    {
+        "question":  "what features does it have",
+        "normalized":  "what features does it have",
+        "keywords":  [
+                         "features"
+                     ],
+        "timestamp":  "2026-06-22T19:27:06",
+        "confidence":  0.0914,
+        "occurrences":  1,
+        "category":  "unclassified"
+    },
+    {
+        "question":  "can i undo changes",
+        "normalized":  "can i undo changes",
+        "keywords":  [
+                         "undo",
+                         "changes"
+                     ],
+        "timestamp":  "2026-06-22T19:27:07",
+        "confidence":  0.2929,
+        "occurrences":  1,
+        "category":  "unclassified"
+    },
+    {
+        "question":  "is it free",
+        "normalized":  "is it free",
+        "keywords":  [
+                         "free"
+                     ],
+        "timestamp":  "2026-06-22T19:28:03",
+        "confidence":  0.15,
+        "occurrences":  1,
+        "category":  "unclassified"
+    },
+    {
+        "question":  "does it delete my files",
+        "normalized":  "does it delete my files",
+        "keywords":  [
+                         "delete",
+                         "files"
+                     ],
+        "timestamp":  "2026-06-22T19:29:36",
+        "confidence":  0.1938,
+        "occurrences":  1,
+        "category":  "unclassified"
+    },
+    {
+        "question":  "what windows versions",
+        "normalized":  "what windows versions",
+        "keywords":  [
+                         "windows",
+                         "versions"
+                     ],
+        "timestamp":  "2026-06-22T19:30:38",
+        "confidence":  0.1345,
+        "occurrences":  1,
+        "category":  "unclassified"
     }
 ]
