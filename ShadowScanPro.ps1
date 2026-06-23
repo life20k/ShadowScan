@@ -2,6 +2,7 @@
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName PresentationCore
 Add-Type -AssemblyName WindowsBase
+Add-Type -AssemblyName System.Windows.Forms
 
 $xamlPath = Join-Path $PSScriptRoot "gui.xaml"
 [xml]$xaml = Get-Content $xamlPath -Raw
@@ -135,9 +136,14 @@ $Window.FindName("ScanBtn").Add_Click({
         $psi.RedirectStandardError = $true
         $psi.CreateNoWindow = $true
         $proc = [System.Diagnostics.Process]::Start($psi)
+
+        while (-not $proc.HasExited) {
+            [System.Windows.Forms.Application]::DoEvents()
+            Start-Sleep -Milliseconds 50
+        }
+
         $stdout = $proc.StandardOutput.ReadToEnd()
         $stderr = $proc.StandardError.ReadToEnd()
-        $proc.WaitForExit()
         Set-Progress 90
         if ($stdout) { foreach ($line in $stdout.Split("`n")) { if ($line.Trim()) { Write-Log $line.Trim() } } }
         if ($stderr) { foreach ($line in $stderr.Split("`n")) { if ($line.Trim()) { Write-Log $line.Trim() } } }
@@ -185,9 +191,14 @@ $Window.FindName("DryBtn").Add_Click({
         $psi.RedirectStandardError = $true
         $psi.CreateNoWindow = $true
         $proc = [System.Diagnostics.Process]::Start($psi)
+
+        while (-not $proc.HasExited) {
+            [System.Windows.Forms.Application]::DoEvents()
+            Start-Sleep -Milliseconds 50
+        }
+
         $stdout = $proc.StandardOutput.ReadToEnd()
         $stderr = $proc.StandardError.ReadToEnd()
-        $proc.WaitForExit()
         Set-Progress 90
         if ($stdout) { foreach ($line in $stdout.Split("`n")) { if ($line.Trim()) { Write-Log $line.Trim() } } }
         if ($stderr) { foreach ($line in $stderr.Split("`n")) { if ($line.Trim()) { Write-Log $line.Trim() } } }
