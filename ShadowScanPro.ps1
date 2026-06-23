@@ -99,12 +99,13 @@ $Window.FindName("CloseBtn").Add_Click({ $Window.Close() })
 
 $Window.FindName("ScanBtn").Add_Click({
     $flags = Get-Flags
-    if ($flags.Count -eq 0) {
+    $selectedCount = 17 - $flags.Count
+    if ($selectedCount -eq 0) {
         [System.Windows.MessageBox]::Show("Select at least one feature.", "No Features", "OK", "Warning")
         return
     }
     $r = [System.Windows.MessageBox]::Show(
-        "Run cleanup on $($flags.Count) features?`r`nAll changes are backed up. You can revert anytime.",
+        "Run cleanup on $selectedCount feature(s)?`r`nAll changes are backed up. You can revert anytime.",
         "Confirm", "YesNo", "Question")
     if ($r -eq "No") { return }
 
@@ -113,7 +114,7 @@ $Window.FindName("ScanBtn").Add_Click({
     Set-Status "Running..." $Window.FindResource("AccentBrush")
     Set-Progress 0
     $LogBox.Clear()
-    Write-Log "Starting cleanup ($($flags.Count) features)..."
+    Write-Log "Starting cleanup ($selectedCount features)..."
 
     $script = Join-Path $PSScriptRoot "ShadowScan.ps1"
     if (-not (Test-Path $script)) {
@@ -126,7 +127,7 @@ $Window.FindName("ScanBtn").Add_Click({
 
     try {
         Set-Progress 10
-        $out = & powershell -ExecutionPolicy Bypass -File $script -All @flags 2>&1
+        $out = & powershell -NoProfile -ExecutionPolicy Bypass -File $script -All @flags 2>&1
         Set-Progress 90
         foreach ($line in $out) { Write-Log $line.ToString() }
         Set-Progress 100
@@ -142,7 +143,8 @@ $Window.FindName("ScanBtn").Add_Click({
 
 $Window.FindName("DryBtn").Add_Click({
     $flags = Get-Flags
-    if ($flags.Count -eq 0) {
+    $selectedCount = 17 - $flags.Count
+    if ($selectedCount -eq 0) {
         [System.Windows.MessageBox]::Show("Select at least one feature.", "No Features", "OK", "Warning")
         return
     }
@@ -151,7 +153,7 @@ $Window.FindName("DryBtn").Add_Click({
     Set-Status "Previewing..." $Window.FindResource("AccentBrush")
     Set-Progress 0
     $LogBox.Clear()
-    Write-Log "DRY RUN ($($flags.Count) features) - No changes"
+    Write-Log "DRY RUN ($selectedCount features) - No changes"
 
     $script = Join-Path $PSScriptRoot "ShadowScan.ps1"
     if (-not (Test-Path $script)) {
@@ -164,7 +166,7 @@ $Window.FindName("DryBtn").Add_Click({
 
     try {
         Set-Progress 10
-        $out = & powershell -ExecutionPolicy Bypass -File $script -All -DryRun @flags 2>&1
+        $out = & powershell -NoProfile -ExecutionPolicy Bypass -File $script -All -DryRun @flags 2>&1
         Set-Progress 90
         foreach ($line in $out) { Write-Log $line.ToString() }
         Set-Progress 100
