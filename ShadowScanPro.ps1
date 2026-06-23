@@ -74,13 +74,13 @@ function Set-Status([string]$Text, $Clr) {
 }
 
 function Set-Progress([int]$Pct) {
-    $ProgressFill.Width = [Math]::Min(340, 340 * $Pct / 100)
+    $ProgressFill.Width = [Math]::Max(0, [Math]::Min(380, 380 * $Pct / 100))
 }
 
 function Get-Flags {
     $out = @()
     for ($i = 0; $i -lt $Script:CBs.Count; $i++) {
-        if ($Script:CBs[$i].IsChecked -eq $true) { $out += $FeatureFlags[$i] }
+        if ($Script:CBs[$i].IsChecked -eq $false) { $out += $FeatureFlags[$i] }
     }
     return $out
 }
@@ -112,6 +112,7 @@ $Window.FindName("ScanBtn").Add_Click({
     $Window.FindName("DryBtn").IsEnabled = $false
     Set-Status "Running..." $Window.FindResource("AccentBrush")
     Set-Progress 0
+    $LogBox.Clear()
     Write-Log "Starting cleanup ($($flags.Count) features)..."
 
     $script = Join-Path $PSScriptRoot "ShadowScan.ps1"
@@ -124,13 +125,13 @@ $Window.FindName("ScanBtn").Add_Click({
     }
 
     try {
-        Set-Progress 20
+        Set-Progress 10
         $out = & powershell -ExecutionPolicy Bypass -File $script -All @flags 2>&1
-        Set-Progress 80
+        Set-Progress 90
         foreach ($line in $out) { Write-Log $line.ToString() }
         Set-Progress 100
         Set-Status "Complete!" $Window.FindResource("PrimaryBrush")
-        Write-Log "Done!"
+        Write-Log "Cleanup complete!"
     } catch {
         Write-Log "ERROR: $($_.Exception.Message)"
         Set-Status "Error" $Window.FindResource("DangerBrush")
@@ -149,6 +150,7 @@ $Window.FindName("DryBtn").Add_Click({
     $Window.FindName("DryBtn").IsEnabled = $false
     Set-Status "Previewing..." $Window.FindResource("AccentBrush")
     Set-Progress 0
+    $LogBox.Clear()
     Write-Log "DRY RUN ($($flags.Count) features) - No changes"
 
     $script = Join-Path $PSScriptRoot "ShadowScan.ps1"
@@ -161,9 +163,9 @@ $Window.FindName("DryBtn").Add_Click({
     }
 
     try {
-        Set-Progress 20
+        Set-Progress 10
         $out = & powershell -ExecutionPolicy Bypass -File $script -All -DryRun @flags 2>&1
-        Set-Progress 80
+        Set-Progress 90
         foreach ($line in $out) { Write-Log $line.ToString() }
         Set-Progress 100
         Set-Status "Preview Complete" $Window.FindResource("AccentBrush")
