@@ -127,9 +127,20 @@ $Window.FindName("ScanBtn").Add_Click({
 
     try {
         Set-Progress 10
-        $out = & powershell -NoProfile -ExecutionPolicy Bypass -File $script -All @flags 2>&1
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = "powershell.exe"
+        $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$script`" -All $($flags -join ' ')"
+        $psi.UseShellExecute = $false
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError = $true
+        $psi.CreateNoWindow = $true
+        $proc = [System.Diagnostics.Process]::Start($psi)
+        $stdout = $proc.StandardOutput.ReadToEnd()
+        $stderr = $proc.StandardError.ReadToEnd()
+        $proc.WaitForExit()
         Set-Progress 90
-        foreach ($line in $out) { Write-Log $line.ToString() }
+        if ($stdout) { foreach ($line in $stdout.Split("`n")) { if ($line.Trim()) { Write-Log $line.Trim() } } }
+        if ($stderr) { foreach ($line in $stderr.Split("`n")) { if ($line.Trim()) { Write-Log $line.Trim() } } }
         Set-Progress 100
         Set-Status "Complete!" $Window.FindResource("PrimaryBrush")
         Write-Log "Cleanup complete!"
@@ -166,9 +177,20 @@ $Window.FindName("DryBtn").Add_Click({
 
     try {
         Set-Progress 10
-        $out = & powershell -NoProfile -ExecutionPolicy Bypass -File $script -All -DryRun @flags 2>&1
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = "powershell.exe"
+        $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$script`" -All -DryRun $($flags -join ' ')"
+        $psi.UseShellExecute = $false
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError = $true
+        $psi.CreateNoWindow = $true
+        $proc = [System.Diagnostics.Process]::Start($psi)
+        $stdout = $proc.StandardOutput.ReadToEnd()
+        $stderr = $proc.StandardError.ReadToEnd()
+        $proc.WaitForExit()
         Set-Progress 90
-        foreach ($line in $out) { Write-Log $line.ToString() }
+        if ($stdout) { foreach ($line in $stdout.Split("`n")) { if ($line.Trim()) { Write-Log $line.Trim() } } }
+        if ($stderr) { foreach ($line in $stderr.Split("`n")) { if ($line.Trim()) { Write-Log $line.Trim() } } }
         Set-Progress 100
         Set-Status "Preview Complete" $Window.FindResource("AccentBrush")
         Write-Log "Dry run finished"
