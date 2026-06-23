@@ -101,5 +101,18 @@
         "confidence":  0.087,
         "occurrences":  1,
         "category":  "unclassified"
+    },
+    {
+        "question":  "how can i stop running the program",
+        "normalized":  "how can i stop running the program",
+        "keywords":  [
+                         "stop",
+                         "running",
+                         "program"
+                     ],
+        "timestamp":  "2026-06-22T20:24:30",
+        "confidence":  0.1104,
+        "occurrences":  1,
+        "category":  "unclassified"
     }
 ]
