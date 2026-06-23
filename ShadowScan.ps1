@@ -39,6 +39,7 @@ param(
     [switch]$SkipBrowsers,
     [switch]$SkipVisualEffects,
     [switch]$SkipDevCleanup,
+    [switch]$SkipWinSxS,
     [switch]$DryRun,
     [switch]$All,
     [switch]$Revert,
@@ -775,9 +776,41 @@ if ($selection -eq 'q') { exit }
 # Process selection
 if ($selection -eq 'a') {
     $All = $true
+    $SkipTemp = $false
+    $SkipDownloads = $false
+    $SkipOrphans = $false
+    $SkipAccessibility = $false
+    $SkipWiFi = $false
+    $SkipShadowAccounts = $false
+    $SkipRegistry = $false
+    $SkipSystem = $false
+    $SkipProcessScan = $false
+    $SkipSystemRepair = $false
+    $SkipStartup = $false
+    $SkipServices = $false
+    $SkipBrowsers = $false
+    $SkipVisualEffects = $false
+    $SkipDevCleanup = $false
+    $SkipWinSxS = $false
 } elseif ($selection -eq 'd') {
     $DryRun = $true
     $All = $true
+    $SkipTemp = $false
+    $SkipDownloads = $false
+    $SkipOrphans = $false
+    $SkipAccessibility = $false
+    $SkipWiFi = $false
+    $SkipShadowAccounts = $false
+    $SkipRegistry = $false
+    $SkipSystem = $false
+    $SkipProcessScan = $false
+    $SkipSystemRepair = $false
+    $SkipStartup = $false
+    $SkipServices = $false
+    $SkipBrowsers = $false
+    $SkipVisualEffects = $false
+    $SkipDevCleanup = $false
+    $SkipWinSxS = $false
 } elseif ($selection -match ',') {
     # Multiple selections
     $selected = $selection -split ','
@@ -797,6 +830,7 @@ if ($selection -eq 'a') {
     $SkipBrowsers = $true
     $SkipVisualEffects = $true
     $SkipDevCleanup = $true
+    $SkipWinSxS = $true
     
     foreach ($num in $selected) {
         switch ($num.Trim()) {
@@ -816,7 +850,7 @@ if ($selection -eq 'a') {
             "14" { $SkipBrowsers = $false }
             "15" { $SkipVisualEffects = $false }
             "16" { $SkipDevCleanup = $false }
-            "17" { $SkipSystem = $false }
+            "17" { $SkipWinSxS = $false }
         }
     }
 } elseif ($selection -match '^\d+$') {
@@ -869,7 +903,7 @@ Write-Host ""
 # 1. JUNK FILE CLEANUP
 # ============================================================
 
-if (-not $SkipTemp -or $All) {
+if (-not $SkipTemp) {
     Write-Header "1. Cleaning Temp Files & Caches"
 
     $tempPaths = @(
@@ -904,7 +938,7 @@ if (-not $SkipTemp -or $All) {
 # 2. DOWNLOADS CLEANUP
 # ============================================================
 
-if (-not $SkipDownloads -or $All) {
+if (-not $SkipDownloads) {
     Write-Header "2. Cleaning Downloads Folder"
 
     $downloads = "$env:USERPROFILE\Downloads"
@@ -990,7 +1024,7 @@ if (-not $SkipDownloads -or $All) {
 # 3. UNIVERSAL ORPHANED FOLDER CLEANUP
 # ============================================================
 
-if (-not $SkipOrphans -or $All) {
+if (-not $SkipOrphans) {
     Write-Header "3. Universal Orphan Detection"
 
     # Expanded pattern list - catches 50+ known PUP/adware/bloatware names
@@ -1161,7 +1195,7 @@ if (-not $SkipOrphans -or $All) {
 # 4. ACCESSIBILITY FIXES
 # ============================================================
 
-if (-not $SkipAccessibility -or $All) {
+if (-not $SkipAccessibility) {
     Write-Header "4. Disabling Keyboard Accessibility Features"
 
     # Disable StickyKeys
@@ -1190,7 +1224,7 @@ if (-not $SkipAccessibility -or $All) {
 # 5. WIFI OPTIMIZATION
 # ============================================================
 
-if (-not $SkipWiFi -or $All) {
+if (-not $SkipWiFi) {
     Write-Header "5. Optimizing WiFi"
 
     # Backup WiFi profiles before modifying
@@ -1226,7 +1260,7 @@ if (-not $SkipWiFi -or $All) {
 # 6. SHADOW ACCOUNT REMOVAL
 # ============================================================
 
-if (-not $SkipShadowAccounts -or $All) {
+if (-not $SkipShadowAccounts) {
     Write-Header "6. Checking for Shadow/Suspicious Accounts"
 
     # Check for shadow user accounts
@@ -1296,7 +1330,7 @@ if (-not $SkipShadowAccounts -or $All) {
 # 7. STARTUP CLEANUP
 # ============================================================
 
-if (-not $SkipStartup -or $All) {
+if (-not $SkipStartup) {
     Write-Header "7. Checking Startup Items"
 
     # Backup startup entries before modifying
@@ -1358,7 +1392,7 @@ foreach ($task in $suspiciousTasks) {
 # 8. REGISTRY CLEANUP
 # ============================================================
 
-if (-not $SkipRegistry -or $All) {
+if (-not $SkipRegistry) {
     Write-Header "8. Cleaning Registry"
 
     # Backup registry before modifying
@@ -1444,7 +1478,7 @@ if (-not $SkipRegistry -or $All) {
 # 9. SYSTEM CLEANUP
 # ============================================================
 
-if (-not $SkipSystem -or $All) {
+if (-not $SkipSystem) {
     Write-Header "9. System Cleanup"
 
     # Flush DNS cache
@@ -1497,7 +1531,7 @@ if (-not $SkipSystem -or $All) {
 # 10. PROCESS SCAN
 # ============================================================
 
-if (-not $SkipProcessScan -or $All) {
+if (-not $SkipProcessScan) {
     Write-Header "10. Scanning Running Processes"
 
     # Known legitimate Windows processes
@@ -1647,7 +1681,7 @@ if (-not $SkipProcessScan -or $All) {
 # 11. CORRUPTED SYSTEM FILE REPAIR
 # ============================================================
 
-if (-not $SkipSystemRepair -or $All) {
+if (-not $SkipSystemRepair) {
     Write-Header "11. Repairing Corrupted System Files"
 
     $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -1686,7 +1720,7 @@ if (-not $SkipSystemRepair -or $All) {
 # 12. STARTUP IMPACT ANALYZER
 # ============================================================
 
-if (-not $SkipStartup -or $All) {
+if (-not $SkipStartup) {
     Write-Header "12. Startup Impact Analyzer"
 
     $startupItems = @()
@@ -1793,7 +1827,7 @@ if (-not $SkipStartup -or $All) {
 # 13. UNNECESSARY SERVICE KILLER
 # ============================================================
 
-if (-not $SkipServices -or $All) {
+if (-not $SkipServices) {
     Write-Header "13. Service Analysis"
 
     # Backup services before analysis
@@ -1892,7 +1926,7 @@ if (-not $SkipServices -or $All) {
 # 14. BROWSER BLOAT CLEANER
 # ============================================================
 
-if (-not $SkipBrowsers -or $All) {
+if (-not $SkipBrowsers) {
     Write-Header "14. Browser Bloat Cleaner"
 
     # Detect installed browsers
@@ -2007,7 +2041,7 @@ if (-not $SkipBrowsers -or $All) {
 # 15. VISUAL EFFECTS OPTIMIZER
 # ============================================================
 
-if (-not $SkipVisualEffects -or $All) {
+if (-not $SkipVisualEffects) {
     Write-Header "15. Visual Effects Optimizer"
 
     # Backup visual effects before modifying
@@ -2064,7 +2098,7 @@ if (-not $SkipVisualEffects -or $All) {
 # 16. DEVELOPER CACHE CLEANUP
 # ============================================================
 
-if (-not $SkipDevCleanup -or $All) {
+if (-not $SkipDevCleanup) {
     Write-Header "16. Developer Cache Cleanup"
 
     $devToolsFound = @()
@@ -2210,7 +2244,7 @@ if (-not $SkipDevCleanup -or $All) {
 # 17. WinSxS COMPONENT CLEANUP
 # ============================================================
 
-if (-not $SkipSystem -or $All) {
+if (-not $SkipWinSxS) {
     Write-Header "17. WinSxS Component Cleanup"
 
     $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
