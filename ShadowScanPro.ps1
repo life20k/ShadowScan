@@ -85,58 +85,54 @@ function Get-Flags {
     return $out
 }
 
-function Run-ScriptAsync {
-    param([string]$ScriptPath, [string[]]$ExtraArgs)
+function Start-Run {
+    param([string]$Status, [string]$Color, [string[]]$Args)
 
     $Window.FindName("ScanBtn").IsEnabled = $false
     $Window.FindName("DryBtn").IsEnabled = $false
+    Set-Status $Status $Window.FindResource($Color)
 
-    $Script:bgRunspace = [runspacefactory]::CreateRunspace()
-    $Script:bgRunspace.Open()
-    $Script:bgPS = [powershell]::Create()
-    $Script:bgPS.Runspace = $Script:bgRunspace
+    $script = Join-Path $PSScriptRoot "ShadowScan.ps1"
 
-    $allArgs = @($ScriptPath) + $ExtraArgs
-    $Script:bgPS.AddScript({
-        param($path, $args)
-        Set-Location (Split-Path $path)
-        $content = Get-Content $path -Raw
-        $content = $content -replace '#Requires -Version 5.1', ''
-        $sb = [scriptblock]::Create($content)
-        & $sb @args
-    }).AddArgument($ScriptPath).AddArgument($ExtraArgs) | Out-Null
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = "powershell.exe"
+    $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$script`" $($Args -join ' ')"
+    $psi.UseShellExecute = $false
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.CreateNoWindow = $true
 
-    $Script:bgPS.BeginInvoke()
+    $Script:runProc = [System.Diagnostics.Process]::Start($psi)
+    $Script:runProc.BeginOutputReadLine()
+    $Script:runProc.BeginErrorReadLine()
+
+    $Script:runProc.add_OutputDataReceived({
+        param($s, $e)
+        if ($e.Data) {
+            $d = $e.Data
+            $Window.Dispatcher.BeginInvoke([action]{ Write-Log $d }) | Out-Null
+        }
+    })
+
+    $Script:runProc.add_ErrorDataReceived({
+        param($s, $e)
+        if ($e.Data) {
+            $d = $e.Data
+            $Window.Dispatcher.BeginInvoke([action]{ Write-Log $d }) | Out-Null
+        }
+    })
 
     $Script:pollTimer = New-Object System.Windows.Threading.DispatcherTimer
-    $Script:pollTimer.Interval = [TimeSpan]::FromMilliseconds(500)
+    $Script:pollTimer.Interval = [timespan]::FromMilliseconds(500)
     $Script:pollTimer.Add_Tick({
-        if ($Script:bgPS -and $Script:bgPS.InvocationStateInfo.State -ne "Running") {
+        if ($Script:runProc -and $Script:runProc.HasExited) {
             $Script:pollTimer.Stop()
             $Script:pollTimer = $null
-
-            $state = $Script:bgPS.InvocationStateInfo.State
-            if ($state -eq "Failed") {
-                $err = $Script:bgPS.InvocationStateInfo.Reason
-                Write-Log "ERROR: $($err.Exception.Message)"
-            }
-
-            try {
-                $output = $Script:bgPS.Streams.Output
-                foreach ($line in $output) { Write-Log $line.ToString() }
-            } catch {}
-
-            try {
-                $errOutput = $Script:bgPS.Streams.Error
-                foreach ($line in $errOutput) { Write-Log "[ERR] $($line.ToString())" }
-            } catch {}
-
-            $Script:bgPS.Dispose()
-            $Script:bgPS = $null
-            $Script:bgRunspace.Close()
-            $Script:bgRunspace = $null
-
+            $Script:runProc.Dispose()
+            $Script:runProc = $null
             Set-Progress 100
+            Set-Status "Complete!" $Window.FindResource("PrimaryBrush")
+            Write-Log "Done!"
             $Window.FindName("ScanBtn").IsEnabled = $true
             $Window.FindName("DryBtn").IsEnabled = $true
         }
@@ -165,24 +161,13 @@ $Window.FindName("ScanBtn").Add_Click({
         return
     }
     $r = [System.Windows.MessageBox]::Show(
-        "Run cleanup on $selectedCount feature(s)?`r`nAll changes are backed up. You can revert anytime.",
+        "Run cleanup on $selectedCount feature(s)?`r`nAll changes are backed up.",
         "Confirm", "YesNo", "Question")
     if ($r -eq "No") { return }
-
-    Set-Status "Running..." $Window.FindResource("AccentBrush")
     Set-Progress 0
     $LogBox.Clear()
     Write-Log "Starting cleanup ($selectedCount features)..."
-
-    $script = Join-Path $PSScriptRoot "ShadowScan.ps1"
-    if (-not (Test-Path $script)) {
-        Write-Log "ERROR: ShadowScan.ps1 not found"
-        Set-Status "Error" $Window.FindResource("DangerBrush")
-        return
-    }
-
-    Run-ScriptAsync -ScriptPath $script -ExtraArgs (@("-All") + $flags)
-    Set-Status "Running..." $Window.FindResource("AccentBrush")
+    Start-Run -Status "Running..." -Color "AccentBrush" -Args (@("-All") + $flags)
 })
 
 $Window.FindName("DryBtn").Add_Click({
@@ -192,41 +177,19 @@ $Window.FindName("DryBtn").Add_Click({
         [System.Windows.MessageBox]::Show("Select at least one feature.", "No Features", "OK", "Warning")
         return
     }
-
-    Set-Status "Previewing..." $Window.FindResource("AccentBrush")
     Set-Progress 0
     $LogBox.Clear()
     Write-Log "DRY RUN ($selectedCount features) - No changes"
-
-    $script = Join-Path $PSScriptRoot "ShadowScan.ps1"
-    if (-not (Test-Path $script)) {
-        Write-Log "ERROR: ShadowScan.ps1 not found"
-        Set-Status "Error" $Window.FindResource("DangerBrush")
-        return
-    }
-
-    Run-ScriptAsync -ScriptPath $script -ExtraArgs (@("-All", "-DryRun") + $flags)
-    Set-Status "Previewing..." $Window.FindResource("AccentBrush")
+    Start-Run -Status "Previewing..." -Color "AccentBrush" -Args (@("-All", "-DryRun") + $flags)
 })
 
 $Window.FindName("RevertBtn").Add_Click({
-    $r = [System.Windows.MessageBox]::Show(
-        "Revert ALL changes?", "Confirm Revert", "YesNo", "Warning")
+    $r = [System.Windows.MessageBox]::Show("Revert ALL changes?", "Confirm Revert", "YesNo", "Warning")
     if ($r -eq "No") { return }
-
-    Set-Status "Reverting..." $Window.FindResource("WarningBrush")
-    Write-Log "Starting revert..."
     Set-Progress 0
-
-    $script = Join-Path $PSScriptRoot "ShadowScan.ps1"
-    if (-not (Test-Path $script)) {
-        Write-Log "ERROR: ShadowScan.ps1 not found"
-        Set-Status "Error" $Window.FindResource("DangerBrush")
-        return
-    }
-
-    Run-ScriptAsync -ScriptPath $script -ExtraArgs @("-Revert")
-    Set-Status "Reverting..." $Window.FindResource("WarningBrush")
+    $LogBox.Clear()
+    Write-Log "Starting revert..."
+    Start-Run -Status "Reverting..." -Color "WarningBrush" -Args @("-Revert")
 })
 
 $Window.FindName("SupportBtn").Add_Click({
