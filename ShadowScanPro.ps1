@@ -2,7 +2,6 @@
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName PresentationCore
 Add-Type -AssemblyName WindowsBase
-Add-Type -AssemblyName System.Windows.Forms
 
 $xamlPath = Join-Path $PSScriptRoot "gui.xaml"
 [xml]$xaml = Get-Content $xamlPath -Raw
@@ -98,89 +97,6 @@ $noneBtn.Add_Click({
 
 $Window.FindName("CloseBtn").Add_Click({ $Window.Close() })
 
-# Helper: Run script async without freezing GUI
-function Start-AsyncProcess {
-    param(
-        [string]$ScriptPath,
-        [string[]]$Arguments,
-        [string]$CompleteStatus,
-        [string]$CompleteColor
-    )
-
-    $Window.FindName("ScanBtn").IsEnabled = $false
-    $Window.FindName("DryBtn").IsEnabled = $false
-
-    $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName = "powershell.exe"
-    $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$ScriptPath`" $($Arguments -join ' ')"
-    $psi.UseShellExecute = $false
-    $psi.RedirectStandardOutput = $true
-    $psi.RedirectStandardError = $true
-    $psi.CreateNoWindow = $true
-
-    try {
-        $Script:currentProc = [System.Diagnostics.Process]::Start($psi)
-    } catch {
-        Write-Log "ERROR: Failed to start process - $($_.Exception.Message)"
-        Set-Status "Error" $Window.FindResource("DangerBrush")
-        $Window.FindName("ScanBtn").IsEnabled = $true
-        $Window.FindName("DryBtn").IsEnabled = $true
-        return
-    }
-
-    # Async output reading
-    $Script:currentProc.BeginOutputReadLine()
-    $Script:currentProc.BeginErrorReadLine()
-
-    $Script:currentProc.add_OutputDataReceived({
-        param($sender, $e)
-        if ($e.Data) {
-            $line = $e.Data
-            [void]$Window.Dispatcher.BeginInvoke([System.Action]{
-                Write-Log $line
-            })
-        }
-    })
-
-    $Script:currentProc.add_ErrorDataReceived({
-        param($sender, $e)
-        if ($e.Data) {
-            $line = $e.Data
-            [void]$Window.Dispatcher.BeginInvoke([System.Action]{
-                Write-Log "[ERR] $line"
-            })
-        }
-    })
-
-    # Timer to poll for completion
-    $Script:runTimer = New-Object System.Windows.Threading.DispatcherTimer
-    $Script:runTimer.Interval = [TimeSpan]::FromMilliseconds(200)
-
-    $Script:runTimer.add_Tick({
-        if ($Script:currentProc -and $Script:currentProc.HasExited) {
-            $Script:runTimer.Stop()
-            $Script:runTimer = $null
-            $exitCode = $Script:currentProc.ExitCode
-            $Script:currentProc.Dispose()
-            $Script:currentProc = $null
-
-            Set-Progress 100
-            if ($exitCode -eq 0) {
-                Set-Status $using:CompleteStatus $Window.FindResource($using:CompleteColor)
-                Write-Log "Process complete!"
-            } else {
-                Set-Status "Completed (exit code $exitCode)" $Window.FindResource("WarningBrush")
-                Write-Log "Process exited with code $exitCode"
-            }
-            $Window.FindName("ScanBtn").IsEnabled = $true
-            $Window.FindName("DryBtn").IsEnabled = $true
-        }
-    })
-
-    $Script:runTimer.Start()
-    Set-Progress 10
-}
-
 $Window.FindName("ScanBtn").Add_Click({
     $flags = Get-Flags
     $selectedCount = 17 - $flags.Count
@@ -193,6 +109,8 @@ $Window.FindName("ScanBtn").Add_Click({
         "Confirm", "YesNo", "Question")
     if ($r -eq "No") { return }
 
+    $Window.FindName("ScanBtn").IsEnabled = $false
+    $Window.FindName("DryBtn").IsEnabled = $false
     Set-Status "Running..." $Window.FindResource("AccentBrush")
     Set-Progress 0
     $LogBox.Clear()
@@ -202,11 +120,55 @@ $Window.FindName("ScanBtn").Add_Click({
     if (-not (Test-Path $script)) {
         Write-Log "ERROR: ShadowScan.ps1 not found"
         Set-Status "Error" $Window.FindResource("DangerBrush")
+        $Window.FindName("ScanBtn").IsEnabled = $true
+        $Window.FindName("DryBtn").IsEnabled = $true
         return
     }
 
-    $args = @("-All") + $flags
-    Start-AsyncProcess -ScriptPath $script -Arguments $args -CompleteStatus "Complete!" -CompleteColor "PrimaryBrush"
+    # Run in background runspace
+    $runspace = [runspacefactory]::CreateRunspace()
+    $runspace.Open()
+    $ps = [powershell]::Create()
+    $ps.Runspace = $runspace
+    $ps.AddScript({
+        param($scriptPath, $flags)
+        & powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath -All @flags
+    }).AddArgument($script).AddArgument($flags) | Out-Null
+
+    $Script:currentPS = $ps
+    $Script:currentRunspace = $runspace
+
+    $timer = New-Object System.Windows.Threading.DispatcherTimer
+    $timer.Interval = [TimeSpan]::FromMilliseconds(500)
+    $Script:runTimer = $timer
+
+    $timer.Add_Tick({
+        if ($Script:currentPS -and $Script:currentPS.InvocationStateInfo.State -ne "Running") {
+            $timer.Stop()
+            $timer = $null
+            $Script:runTimer = $null
+
+            try {
+                $output = $Script:currentPS.Streams.Information
+                foreach ($line in $output) { Write-Log $line.ToString() }
+            } catch {}
+
+            $Script:currentPS.Dispose()
+            $Script:currentPS = $null
+            $Script:currentRunspace.Close()
+            $Script:currentRunspace = $null
+
+            Set-Progress 100
+            Set-Status "Complete!" $Window.FindResource("PrimaryBrush")
+            Write-Log "Cleanup complete!"
+            $Window.FindName("ScanBtn").IsEnabled = $true
+            $Window.FindName("DryBtn").IsEnabled = $true
+        }
+    })
+
+    $ps.BeginInvoke()
+    $timer.Start()
+    Set-Progress 10
 })
 
 $Window.FindName("DryBtn").Add_Click({
@@ -217,6 +179,8 @@ $Window.FindName("DryBtn").Add_Click({
         return
     }
 
+    $Window.FindName("ScanBtn").IsEnabled = $false
+    $Window.FindName("DryBtn").IsEnabled = $false
     Set-Status "Previewing..." $Window.FindResource("AccentBrush")
     Set-Progress 0
     $LogBox.Clear()
@@ -226,11 +190,49 @@ $Window.FindName("DryBtn").Add_Click({
     if (-not (Test-Path $script)) {
         Write-Log "ERROR: ShadowScan.ps1 not found"
         Set-Status "Error" $Window.FindResource("DangerBrush")
+        $Window.FindName("ScanBtn").IsEnabled = $true
+        $Window.FindName("DryBtn").IsEnabled = $true
         return
     }
 
-    $args = @("-All", "-DryRun") + $flags
-    Start-AsyncProcess -ScriptPath $script -Arguments $args -CompleteStatus "Preview Complete" -CompleteColor "AccentBrush"
+    $runspace = [runspacefactory]::CreateRunspace()
+    $runspace.Open()
+    $ps = [powershell]::Create()
+    $ps.Runspace = $runspace
+    $ps.AddScript({
+        param($scriptPath, $flags)
+        & powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath -All -DryRun @flags
+    }).AddArgument($script).AddArgument($flags) | Out-Null
+
+    $Script:currentPS = $ps
+    $Script:currentRunspace = $runspace
+
+    $timer = New-Object System.Windows.Threading.DispatcherTimer
+    $timer.Interval = [TimeSpan]::FromMilliseconds(500)
+    $Script:runTimer = $timer
+
+    $timer.Add_Tick({
+        if ($Script:currentPS -and $Script:currentPS.InvocationStateInfo.State -ne "Running") {
+            $timer.Stop()
+            $timer = $null
+            $Script:runTimer = $null
+
+            $Script:currentPS.Dispose()
+            $Script:currentPS = $null
+            $Script:currentRunspace.Close()
+            $Script:currentRunspace = $null
+
+            Set-Progress 100
+            Set-Status "Preview Complete" $Window.FindResource("AccentBrush")
+            Write-Log "Dry run finished"
+            $Window.FindName("ScanBtn").IsEnabled = $true
+            $Window.FindName("DryBtn").IsEnabled = $true
+        }
+    })
+
+    $ps.BeginInvoke()
+    $timer.Start()
+    Set-Progress 10
 })
 
 $Window.FindName("RevertBtn").Add_Click({
@@ -248,7 +250,42 @@ $Window.FindName("RevertBtn").Add_Click({
         return
     }
 
-    Start-AsyncProcess -ScriptPath $script -Arguments @("-Revert") -CompleteStatus "Reverted!" -CompleteColor "PrimaryBrush"
+    $runspace = [runspacefactory]::CreateRunspace()
+    $runspace.Open()
+    $ps = [powershell]::Create()
+    $ps.Runspace = $runspace
+    $ps.AddScript({
+        param($scriptPath)
+        & powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath -Revert
+    }).AddArgument($script) | Out-Null
+
+    $Script:currentPS = $ps
+    $Script:currentRunspace = $runspace
+
+    $timer = New-Object System.Windows.Threading.DispatcherTimer
+    $timer.Interval = [TimeSpan]::FromMilliseconds(500)
+    $Script:runTimer = $timer
+
+    $timer.Add_Tick({
+        if ($Script:currentPS -and $Script:currentPS.InvocationStateInfo.State -ne "Running") {
+            $timer.Stop()
+            $timer = $null
+            $Script:runTimer = $null
+
+            $Script:currentPS.Dispose()
+            $Script:currentPS = $null
+            $Script:currentRunspace.Close()
+            $Script:currentRunspace = $null
+
+            Set-Status "Reverted!" $Window.FindResource("PrimaryBrush")
+            Write-Log "Revert complete"
+            $Window.FindName("ScanBtn").IsEnabled = $true
+            $Window.FindName("DryBtn").IsEnabled = $true
+        }
+    })
+
+    $ps.BeginInvoke()
+    $timer.Start()
 })
 
 $Window.FindName("SupportBtn").Add_Click({
