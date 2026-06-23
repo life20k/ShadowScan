@@ -114,5 +114,18 @@
         "confidence":  0.1104,
         "occurrences":  1,
         "category":  "unclassified"
+    },
+    {
+        "question":  "does this program block viruses",
+        "normalized":  "does this program block viruses",
+        "keywords":  [
+                         "program",
+                         "block",
+                         "viruses"
+                     ],
+        "timestamp":  "2026-06-22T20:29:22",
+        "confidence":  0.1058,
+        "occurrences":  1,
+        "category":  "unclassified"
     }
 ]

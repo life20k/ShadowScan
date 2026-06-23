@@ -239,18 +239,30 @@
                                 "answered":  true,
                                 "confidence":  0.825,
                                 "category":  "howto"
+                            },
+                            {
+                                "timestamp":  "2026-06-22T20:29:22",
+                                "answered":  false,
+                                "confidence":  0.1058,
+                                "category":  "howto"
+                            },
+                            {
+                                "timestamp":  "2026-06-22T20:30:24",
+                                "answered":  true,
+                                "confidence":  0.8406,
+                                "category":  "faq"
                             }
                         ],
-    "answeredQuestions":  30,
-    "totalQuestions":  40,
+    "answeredQuestions":  31,
+    "totalQuestions":  42,
     "topCategories":  {
-                          "howto":  11,
-                          "faq":  25,
+                          "howto":  12,
+                          "faq":  26,
                           "error":  1,
                           "feature":  1,
                           "troubleshooting":  1
                       },
-    "unansweredQuestions":  10,
-    "lastUpdated":  "2026-06-22T20:25:30",
-    "averageConfidence":  0.7260
+    "unansweredQuestions":  11,
+    "lastUpdated":  "2026-06-22T20:30:24",
+    "averageConfidence":  0.7297
 }
