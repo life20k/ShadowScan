@@ -1,0 +1,233 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ShadowScan Pro v2.0" Width="920" Height="720"
+        WindowStartupLocation="CenterScreen"
+        Background="#1a1a2e" Foreground="White"
+        ResizeMode="NoResize" WindowStyle="None"
+        AllowsTransparency="True" Opacity="0.98">
+    <Window.Resources>
+        <SolidColorBrush x:Key="BgBrush" Color="#1a1a2e"/>
+        <SolidColorBrush x:Key="SurfaceBrush" Color="#16213e"/>
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#00ff88"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#00d4ff"/>
+        <SolidColorBrush x:Key="TextBrush" Color="#ffffff"/>
+        <SolidColorBrush x:Key="TextDimBrush" Color="#9696aa"/>
+        <SolidColorBrush x:Key="DangerBrush" Color="#ff4757"/>
+        <SolidColorBrush x:Key="WarningBrush" Color="#ffa502"/>
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Foreground" Value="#1a1a2e"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,16"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#00cc6e"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#009952"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="AccentButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="#1a1a2e"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,14"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#00b8e6"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#0099cc"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="WarningButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
+            <Setter Property="Foreground" Value="#1a1a2e"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,14"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#e69500"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#cc8500"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="DarkButton" TargetType="Button">
+            <Setter Property="Background" Value="#282840"/>
+            <Setter Property="Foreground" Value="{StaticResource TextDimBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,12"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#1e2a4a"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CloseButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextDimBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6" Padding="8,4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#ff4757"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="FeatureCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Horizontal">
+                            <Border x:Name="box" Width="20" Height="20" CornerRadius="4" BorderThickness="2" BorderBrush="#9696aa" Background="Transparent" VerticalAlignment="Center">
+                                <TextBlock x:Name="check" Text="&#x2713;" Foreground="{StaticResource PrimaryBrush}" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+                            </Border>
+                            <ContentPresenter Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="box" Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                                <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                                <Setter TargetName="check" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Border Background="{StaticResource BgBrush}" CornerRadius="12">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.3" Color="Black"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="70"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="160"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}" CornerRadius="12,12,0,0">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center" Margin="24,0">
+                        <TextBlock Text="SHADOWSCAN PRO" FontSize="26" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
+                        <TextBlock Text="Scan for shadows. Remove the threats." FontSize="12" Foreground="{StaticResource TextDimBrush}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="v2.0.0" Foreground="{StaticResource TextDimBrush}" FontSize="12" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        <Button x:Name="CloseBtn" Style="{StaticResource CloseButton}" Content="X" FontSize="16"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Grid Grid.Row="1" Margin="20,12,20,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <GroupBox Grid.Column="0" Header=" SELECT FEATURES " Foreground="{StaticResource TextBrush}" FontSize="14" FontWeight="SemiBold" BorderThickness="1" BorderBrush="#2a2a4a" Background="{StaticResource SurfaceBrush}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="FeatureStack" Margin="4,0"/>
+                    </ScrollViewer>
+                </GroupBox>
+                <GroupBox Grid.Column="2" Header=" ACTIONS " Foreground="{StaticResource TextBrush}" FontSize="14" FontWeight="SemiBold" BorderThickness="1" BorderBrush="#2a2a4a" Background="{StaticResource SurfaceBrush}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Button x:Name="ScanBtn" Grid.Row="0" Style="{StaticResource PrimaryButton}" Content="SCAN and CLEAN" Margin="0,0,0,12"/>
+                        <Button x:Name="DryBtn" Grid.Row="1" Style="{StaticResource AccentButton}" Content="Dry Run (Preview)" Margin="0,0,0,12"/>
+                        <Button x:Name="RevertBtn" Grid.Row="2" Style="{StaticResource WarningButton}" Content="Revert Changes" Margin="0,0,0,12"/>
+                        <Button x:Name="SupportBtn" Grid.Row="3" Style="{StaticResource DarkButton}" Content="Support" Margin="0,0,0,20"/>
+                        <TextBlock x:Name="StatusText" Grid.Row="4" Text="Ready" FontSize="18" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                        <Border Grid.Row="5" Background="#0f1a30" CornerRadius="6" Height="14">
+                            <Border x:Name="ProgressFill" Background="{StaticResource PrimaryBrush}" CornerRadius="6" HorizontalAlignment="Left" Width="0" Height="14"/>
+                        </Border>
+                        <StackPanel Grid.Row="7" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,16,0,0">
+                            <TextBlock Text="Made by " Foreground="{StaticResource TextDimBrush}" FontSize="11" VerticalAlignment="Center"/>
+                            <TextBlock Text="Ben The Fix-It Guy" Foreground="{StaticResource AccentBrush}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+            <GroupBox Grid.Row="2" Header=" OUTPUT LOG " Foreground="{StaticResource TextBrush}" FontSize="14" FontWeight="SemiBold" BorderThickness="1" BorderBrush="#2a2a4a" Background="{StaticResource SurfaceBrush}" Margin="20,12,20,16">
+                <TextBox x:Name="LogBox" Background="{StaticResource BgBrush}" Foreground="{StaticResource PrimaryBrush}" FontFamily="Consolas" FontSize="10" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" BorderThickness="0" Padding="8"/>
+            </GroupBox>
+        </Grid>
+    </Border>
+</Window>
