@@ -744,6 +744,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 # Feature selection menu
+if (-not $All) {
 Write-Host "  Select features to run:" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "    [1]  Temp File Cleanup" -ForegroundColor White
@@ -894,6 +895,7 @@ if ($selection -eq 'a') {
     Write-Host "  Invalid selection. Running all features." -ForegroundColor Yellow
     $All = $true
 }
+} # end if (-not $All)
 
 Write-Host ""
 Write-Host "  Starting cleanup..." -ForegroundColor Green
